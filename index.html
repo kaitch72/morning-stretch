@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Morning Stretch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14201F;
+    --surface: #1B2A28;
+    --line: #2C403C;
+    --text: #F4EFE6;
+    --muted: #8FA39C;
+    --accent: #E8815A;
+    --transition-hue: #6FA8A0;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card {
+    width: 100%;
+    max-width: 420px;
+  }
+  .hidden { display: none !important; }
+
+  /* ---- shared text styles ---- */
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 32px;
+    margin: 0 0 6px;
+  }
+  .sub { color: var(--muted); font-size: 15px; margin: 0; }
+
+  button {
+    font-family: 'Space Grotesk', sans-serif;
+    background: none;
+    color: var(--text);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  button:focus-visible, a:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .ghost-btn {
+    border-bottom: 1px solid var(--line);
+    padding: 6px 2px;
+    color: var(--muted);
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .ghost-btn:hover { color: var(--text); border-color: var(--muted); }
+
+  .primary-btn {
+    display: block;
+    width: 100%;
+    background: var(--accent);
+    color: #1B1310;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 16px;
+    border-radius: 4px;
+    margin-top: 28px;
+  }
+  .primary-btn:hover { filter: brightness(1.06); }
+
+  /* ---- START screen ---- */
+  #start-screen .meta { margin: 18px 0 0; color: var(--muted); font-size: 15px; }
+
+  #pose-list {
+    margin-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .pose-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .pose-row label { flex: 1; font-size: 15px; }
+  .pose-row input[type="checkbox"] {
+    width: 20px; height: 20px; accent-color: var(--accent); flex: none;
+  }
+
+  /* ---- ACTIVE screen ---- */
+  #progress-track {
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  #progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width .3s linear;
+  }
+  .step-count {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: .02em;
+    margin: 0 0 14px;
+  }
+
+  #pose-image-wrap {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+  #pose-image-wrap img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  #pose-image-fallback {
+    color: var(--muted);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    padding: 0 24px;
+    text-align: center;
+  }
+
+  #pose-name {
+    font-size: 28px;
+    margin: 0;
+    transition: color .25s ease;
+  }
+  #pose-side {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 4px 0 0;
+    min-height: 20px;
+  }
+
+  #clock {
+    font-size: 104px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 22px 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .active-pose #clock, .active-pose #pose-name { color: var(--text); }
+  .active-transition #clock, .active-transition #pose-name { color: var(--transition-hue); }
+
+  #controls {
+    display: flex;
+    gap: 28px;
+    margin-top: 20px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  #controls button { padding: 4px 0; }
+
+  #up-next {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  #up-next strong { color: var(--text); font-weight: 500; }
+
+  /* ---- DONE screen ---- */
+  #done-screen p.sub { margin-top: 10px; }
+
+  @media (max-width: 420px) {
+    #clock { font-size: 84px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #progress-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="screen-wrap" class="card">
+
+  <!-- START -->
+  <section id="start-screen">
+    <h1>Morning Stretch</h1>
+    <p class="sub" id="start-summary">Loading&hellip;</p>
+
+    <button id="customize-toggle" class="ghost-btn" type="button" style="margin-top:22px;">Customize routine</button>
+
+    <div id="pose-list" class="hidden"></div>
+
+    <button id="start-btn" class="primary-btn" type="button">Start</button>
+  </section>
+
+  <!-- ACTIVE -->
+  <section id="active-screen" class="hidden">
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <p class="step-count" id="step-count">Pose 1 of 10</p>
+
+    <div id="pose-image-wrap">
+      <div id="pose-image-fallback"></div>
+      <img id="pose-image" class="hidden" alt="">
+    </div>
+
+    <h2 id="pose-name" style="font-family:'Fraunces',serif;font-weight:500;">Neck Side Stretch</h2>
+    <p id="pose-side"></p>
+
+    <div id="clock">0:30</div>
+
+    <div id="controls">
+      <button id="pause-btn" class="ghost-btn" type="button">Pause</button>
+      <button id="skip-btn" class="ghost-btn" type="button">Skip</button>
+      <button id="restart-btn" class="ghost-btn" type="button">Restart</button>
+    </div>
+
+    <p id="up-next">Up next &mdash; <strong id="up-next-name"></strong></p>
+  </section>
+
+  <!-- DONE -->
+  <section id="done-screen" class="hidden">
+    <h1>Nice stretch.</h1>
+    <p class="sub" id="done-summary"></p>
+    <button id="again-btn" class="primary-btn" type="button">Do it again</button>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     CONFIGURE YOUR ROUTINE HERE
+     - Add, remove, or reorder poses freely.
+     - "sides: true" auto-splits a pose into a left + right step,
+       and "image" takes { left, right } paths for that pose.
+     - Non-sided poses just take a single "image" path.
+     - Paths below assume the photos live in a /poses folder
+       next to this file, using the exact filenames you gave.
+       If a photo is missing, a plain placeholder is shown
+       instead, so the app still works either way.
+     ========================================================= */
+  var POSES = [
+    { id: "upper-trap",       name: "Upper Trap Stretch",       sides: true,  image: { left: "poses/Upper_Trap_Left.png",       right: "poses/Upper_Trap_Right.png" } },
+    { id: "levator-scapula",  name: "Levator Scapula Stretch",  sides: true,  image: { left: "poses/Levator_Scapula_Left.png",  right: "poses/Levator_Scapula_Right.png" } },
+    { id: "inferior-shoulder",name: "Inferior Shoulder Stretch",sides: true,  image: { left: "poses/Inferior_Shoulder_Left.png",right: "poses/Inferior_Shoulder_Right.png" } },
+    { id: "chest-opener",     name: "Chest Opener Stretch",     sides: false, image: "poses/Chest_Opener_Stretch.png" },
+    { id: "rhomboid",         name: "Rhomboid Stretch",         sides: false, image: "poses/Rhomboid_Stretch.png" },
+    { id: "hip-flexor",       name: "Hip Flexor Stretch",       sides: true,  image: { left: "poses/Hip_Flexor_Left.png",       right: "poses/Hip_Flexor_Right.png" } },
+    { id: "gluteal",          name: "Gluteal Stretch",          sides: true,  image: { left: "poses/Gluteal_Left.png",          right: "poses/Gluteal_Right.png" } },
+    { id: "hamstring",        name: "Hamstring Stretch",        sides: true,  image: { left: "poses/Hamstring_Left.png",        right: "poses/Hamstring_Right.png" } },
+    { id: "quadricep",        name: "Quadricep Stretch",        sides: true,  image: { left: "poses/Quadricep_Left.png",        right: "poses/Quadricep_Right.png" } },
+    { id: "calf-rotation",    name: "Calf Rotation",            sides: false, image: "poses/Calf_Rotation.png" }
+  ];
+
+  var POSE_SECONDS = 30;
+  var TRANSITION_SECONDS = 3;
+  var STORAGE_KEY = "morningStretch.enabled";
+
+  /* ---------------- state ---------------- */
+  var enabledMap = loadEnabledMap();
+  var sequence = [];
+  var stepIndex = 0;
+  var secondsLeft = 0;
+  var timerHandle = null;
+  var running = false;
+  var wakeLock = null;
+  var audioCtx = null;
+
+  /* ---------------- elements ---------------- */
+  var startScreen = document.getElementById("start-screen");
+  var activeScreen = document.getElementById("active-screen");
+  var doneScreen = document.getElementById("done-screen");
+  var startSummary = document.getElementById("start-summary");
+  var customizeToggle = document.getElementById("customize-toggle");
+  var poseListEl = document.getElementById("pose-list");
+  var startBtn = document.getElementById("start-btn");
+
+  var progressFill = document.getElementById("progress-fill");
+  var stepCountEl = document.getElementById("step-count");
+  var poseImageWrap = document.getElementById("pose-image-wrap");
+  var poseImage = document.getElementById("pose-image");
+  var poseImageFallback = document.getElementById("pose-image-fallback");
+  var poseNameEl = document.getElementById("pose-name");
+  var poseSideEl = document.getElementById("pose-side");
+  var clockEl = document.getElementById("clock");
+  var pauseBtn = document.getElementById("pause-btn");
+  var skipBtn = document.getElementById("skip-btn");
+  var restartBtn = document.getElementById("restart-btn");
+  var upNextEl = document.getElementById("up-next");
+  var upNextNameEl = document.getElementById("up-next-name");
+
+  var doneSummary = document.getElementById("done-summary");
+  var againBtn = document.getElementById("again-btn");
+
+  /* ---------------- persistence ---------------- */
+  function loadEnabledMap() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    var map = {};
+    POSES.forEach(function (p) { map[p.id] = true; });
+    return map;
+  }
+  function saveEnabledMap() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(enabledMap)); } catch (e) {}
+  }
+
+  /* ---------------- sequence building ---------------- */
+  function buildSequence() {
+    var flat = [];
+    POSES.filter(function (p) { return enabledMap[p.id] !== false; })
+      .forEach(function (pose) {
+        var sides = pose.sides ? ["Left side", "Right side"] : [null];
+        sides.forEach(function (side) {
+          var image = pose.sides
+            ? (side === "Left side" ? pose.image.left : pose.image.right)
+            : pose.image;
+          flat.push({ type: "pose", name: pose.name, side: side, image: image, duration: POSE_SECONDS });
+        });
+      });
+    var withTransitions = [];
+    flat.forEach(function (step, i) {
+      withTransitions.push(step);
+      if (i < flat.length - 1) {
+        var next = flat[i + 1];
+        withTransitions.push({
+          type: "transition",
+          name: "Get ready",
+          nextName: next.name,
+          nextSide: next.side,
+          duration: TRANSITION_SECONDS
+        });
+      }
+    });
+    return withTransitions;
+  }
+
+  function totalSeconds(seq) {
+    return seq.reduce(function (sum, s) { return sum + s.duration; }, 0);
+  }
+
+  function poseCount() {
+    return POSES.filter(function (p) { return enabledMap[p.id] !== false; }).length;
+  }
+
+  /* ---------------- start screen ---------------- */
+  function renderStartSummary() {
+    var seq = buildSequence();
+    var mins = Math.round(totalSeconds(seq) / 60);
+    startSummary.textContent = poseCount() + " poses \u00b7 about " + mins + " min";
+  }
+
+  function renderPoseList() {
+    poseListEl.innerHTML = "";
+    POSES.forEach(function (pose) {
+      var row = document.createElement("div");
+      row.className = "pose-row";
+
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "chk-" + pose.id;
+      checkbox.checked = enabledMap[pose.id] !== false;
+      checkbox.addEventListener("change", function () {
+        enabledMap[pose.id] = checkbox.checked;
+        saveEnabledMap();
+        renderStartSummary();
+      });
+
+      var label = document.createElement("label");
+      label.setAttribute("for", checkbox.id);
+      label.textContent = pose.name;
+
+      row.appendChild(checkbox);
+      row.appendChild(label);
+      poseListEl.appendChild(row);
+    });
+  }
+
+  customizeToggle.addEventListener("click", function () {
+    var willShow = poseListEl.classList.contains("hidden");
+    poseListEl.classList.toggle("hidden");
+    customizeToggle.textContent = willShow ? "Hide routine list" : "Customize routine";
+  });
+
+  /* ---------------- end-of-pose chime ---------------- */
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
+    }
+    return audioCtx;
+  }
+  function playTone(ctx, freq, startTime, duration) {
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.16, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  }
+  function chime() {
+    var ctx = ensureAudioCtx();
+    if (!ctx) return;
+    try {
+      var now = ctx.currentTime;
+      playTone(ctx, 880, now, 0.18);
+      playTone(ctx, 1318.5, now + 0.12, 0.22);
+    } catch (e) {}
+  }
+
+  /* ---------------- wake lock ---------------- */
+  function requestWakeLock() {
+    if ("wakeLock" in navigator) {
+      navigator.wakeLock.request("screen").then(function (lock) {
+        wakeLock = lock;
+      }).catch(function () {});
+    }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (running && document.visibilityState === "visible" && !wakeLock) requestWakeLock();
+  });
+
+  /* ---------------- image handling ---------------- */
+  function setPoseImage(path, label) {
+    if (!path) { showImageFallback(label); return; }
+    poseImage.onerror = function () { showImageFallback(label); };
+    poseImage.onload = function () {
+      poseImage.classList.remove("hidden");
+      poseImageFallback.classList.add("hidden");
+    };
+    poseImage.src = path;
+    poseImage.alt = label;
+  }
+  function showImageFallback(label) {
+    poseImage.classList.add("hidden");
+    poseImageFallback.classList.remove("hidden");
+    poseImageFallback.textContent = label;
+  }
+
+  /* ---------------- main timer flow ---------------- */
+  function formatClock(s) {
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
+
+  function goToScreen(el) {
+    [startScreen, activeScreen, doneScreen].forEach(function (s) { s.classList.add("hidden"); });
+    el.classList.remove("hidden");
+  }
+
+  function enterStep(i) {
+    var step = sequence[i];
+    secondsLeft = step.duration;
+    activeScreen.classList.remove("active-pose", "active-transition");
+    activeScreen.classList.add(step.type === "pose" ? "active-pose" : "active-transition");
+
+    if (step.type === "pose") {
+      poseNameEl.textContent = step.name;
+      poseSideEl.textContent = step.side || "";
+      setPoseImage(step.image, step.name);
+      poseImageWrap.classList.remove("hidden");
+      var poseNumber = countCompletedPoses(i) + 1;
+      stepCountEl.textContent = "Pose " + poseNumber + " of " + poseCount();
+    } else {
+      poseNameEl.textContent = "Get ready";
+      poseSideEl.textContent = "";
+      poseImageWrap.classList.add("hidden");
+    }
+
+    var next = sequence[i + 1];
+    if (next) {
+      upNextEl.classList.remove("hidden");
+      upNextNameEl.textContent = next.type === "pose"
+        ? next.name + (next.side ? " (" + next.side + ")" : "")
+        : "next pose";
+    } else {
+      upNextEl.classList.add("hidden");
+    }
+
+    clockEl.textContent = formatClock(secondsLeft);
+    updateProgress();
+  }
+
+  function countCompletedPoses(uptoIndex) {
+    var n = 0;
+    for (var i = 0; i < uptoIndex; i++) {
+      if (sequence[i].type === "pose") n++;
+    }
+    return n;
+  }
+
+  function updateProgress() {
+    var elapsed = 0;
+    for (var i = 0; i < stepIndex; i++) elapsed += sequence[i].duration;
+    elapsed += (sequence[stepIndex].duration - secondsLeft);
+    var total = totalSeconds(sequence);
+    progressFill.style.width = Math.min(100, (elapsed / total) * 100) + "%";
+  }
+
+  function tick() {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      advanceStep();
+    } else {
+      clockEl.textContent = formatClock(secondsLeft);
+      updateProgress();
+    }
+  }
+
+  function advanceStep() {
+    if (sequence[stepIndex].type === "pose") chime();
+    stepIndex++;
+    if (stepIndex >= sequence.length) {
+      finishRoutine();
+    } else {
+      enterStep(stepIndex);
+    }
+  }
+
+  function startTimerLoop() {
+    if (timerHandle) clearInterval(timerHandle);
+    timerHandle = setInterval(tick, 1000);
+  }
+  function stopTimerLoop() {
+    if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+  }
+
+  function startRoutine() {
+    sequence = buildSequence();
+    if (sequence.length === 0) return;
+    stepIndex = 0;
+    running = true;
+    ensureAudioCtx();
+    requestWakeLock();
+    goToScreen(activeScreen);
+    pauseBtn.textContent = "Pause";
+    enterStep(0);
+    startTimerLoop();
+  }
+
+  function togglePause() {
+    if (!running) return;
+    if (timerHandle) {
+      stopTimerLoop();
+      pauseBtn.textContent = "Resume";
+    } else {
+      startTimerLoop();
+      pauseBtn.textContent = "Pause";
+    }
+  }
+
+  function skipStep() {
+    if (!running) return;
+    advanceStep();
+  }
+
+  function finishRoutine() {
+    running = false;
+    stopTimerLoop();
+    releaseWakeLock();
+    doneSummary.textContent = "You got through " + poseCount() + " poses.";
+    goToScreen(doneScreen);
+  }
+
+  function backToStart() {
+    running = false;
+    stopTimerLoop();
+    releaseWakeLock();
+    renderStartSummary();
+    goToScreen(startScreen);
+  }
+
+  /* ---------------- wire up buttons ---------------- */
+  startBtn.addEventListener("click", startRoutine);
+  pauseBtn.addEventListener("click", togglePause);
+  skipBtn.addEventListener("click", skipStep);
+  restartBtn.addEventListener("click", backToStart);
+  againBtn.addEventListener("click", backToStart);
+
+  /* ---------------- init ---------------- */
+  renderPoseList();
+  renderStartSummary();
+})();
+</script>
+</body>
+</html>
