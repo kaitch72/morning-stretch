@@ -133,6 +133,15 @@
   }
   #pose-image-wrap img {
     width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: grayscale(0%);
+    transition: filter .4s ease, opacity .4s ease;
+  }
+  #pose-image-wrap.preview-mode img {
+    filter: grayscale(100%);
+    opacity: .8;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #pose-image-wrap img { transition: none; }
   }
   #pose-image-fallback {
     color: var(--muted);
@@ -260,13 +269,15 @@
     { id: "upper-trap",       name: "Upper Trap Stretch",       sides: true,  image: { left: "poses/Upper_Trap_Left.png",       right: "poses/Upper_Trap_Right.png" } },
     { id: "levator-scapula",  name: "Levator Scapula Stretch",  sides: true,  image: { left: "poses/Levator_Scapula_Left.png",  right: "poses/Levator_Scapula_Right.png" } },
     { id: "inferior-shoulder",name: "Inferior Shoulder Stretch",sides: true,  image: { left: "poses/Inferior_Shoulder_Left.png",right: "poses/Inferior_Shoulder_Right.png" } },
+    { id: "shoulder-roll",    name: "Shoulder Roll",            sides: false, image: "poses/Shoulder_Roll.png" },
     { id: "chest-opener",     name: "Chest Opener Stretch",     sides: false, image: "poses/Chest_Opener_Stretch.png" },
     { id: "rhomboid",         name: "Rhomboid Stretch",         sides: false, image: "poses/Rhomboid_Stretch.png" },
     { id: "hip-flexor",       name: "Hip Flexor Stretch",       sides: true,  image: { left: "poses/Hip_Flexor_Left.png",       right: "poses/Hip_Flexor_Right.png" } },
     { id: "gluteal",          name: "Gluteal Stretch",          sides: true,  image: { left: "poses/Gluteal_Left.png",          right: "poses/Gluteal_Right.png" } },
     { id: "hamstring",        name: "Hamstring Stretch",        sides: true,  image: { left: "poses/Hamstring_Left.png",        right: "poses/Hamstring_Right.png" } },
     { id: "quadricep",        name: "Quadricep Stretch",        sides: true,  image: { left: "poses/Quadricep_Left.png",        right: "poses/Quadricep_Right.png" } },
-    { id: "calf-rotation",    name: "Calf Rotation",            sides: false, image: "poses/Calf_Rotation.png" }
+    { id: "calf-rotation",    name: "Calf Rotation",            sides: false, image: "poses/Calf_Rotation.png" },
+    { id: "plank",            name: "Plank",                    sides: false, image: "poses/Plank.png" }
   ];
 
   var POSE_SECONDS = 30;
@@ -485,12 +496,20 @@
       poseSideEl.textContent = step.side || "";
       setPoseImage(step.image, step.name);
       poseImageWrap.classList.remove("hidden");
+      poseImageWrap.classList.remove("preview-mode");
       var poseNumber = countCompletedPoses(i) + 1;
       stepCountEl.textContent = "Pose " + poseNumber + " of " + poseCount();
     } else {
       poseNameEl.textContent = "Get ready";
       poseSideEl.textContent = "";
-      poseImageWrap.classList.add("hidden");
+      var upcoming = sequence[i + 1];
+      if (upcoming) {
+        setPoseImage(upcoming.image, upcoming.name);
+        poseImageWrap.classList.remove("hidden");
+        poseImageWrap.classList.add("preview-mode");
+      } else {
+        poseImageWrap.classList.add("hidden");
+      }
     }
 
     var next = sequence[i + 1];
